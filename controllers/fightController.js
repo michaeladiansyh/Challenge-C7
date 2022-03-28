@@ -45,6 +45,32 @@ const checkPlayerTurn = async (room, isFirstPlayer, isSecondPlayer) => {
   return true;
 };
 
+const checkGameResult = async (room) => {
+  const { choice1, choice2 } = room;
+  let scoreP1 = 0;
+  let scoreP2 = 0;
+  if (choice1 === choice2) {
+    return res.json("Result is ", DRAW);
+  } else if (
+    (choice1 == SCISSOR && choice2 == PAPER) ||
+    (choice1 == PAPER && choice2 == ROCK) ||
+    (choice1 == ROCK && choice2 == SCISSOR)
+  ) {
+    scoreP1 += 1;
+  } else if (
+    (choice2 == SCISSOR && choice1 == PAPER) ||
+    (choice2 == PAPER && choice1 == ROCK) ||
+    (choice2 == ROCK && choice1 == SCISSOR)
+  ) {
+    scoreP2 += 2;
+  }
+  if (scoreP1 > scoreP2) {
+    return res.json("Player 1 : ", WIN);
+  } else {
+    return res.json("Player 2 : ", WIN);
+  }
+};
+
 const updatePlayer = async (room, userId) => {
   const { id: roomId } = room;
 
@@ -204,7 +230,7 @@ const game = async (req, res) => {
     roomUpdate = await Room.findOne({
       where: { id: roomId },
     });
-    output = { ...roomUpdate.dataValues };
+    output = { roomUpdate };
   } catch (error) {
     return res.json(error);
   }
@@ -214,6 +240,7 @@ const game = async (req, res) => {
   if (lastGame) {
     output = {
       roomId,
+      checkGameComplete,
       message: "Game Sudah Selesai",
     };
   }
