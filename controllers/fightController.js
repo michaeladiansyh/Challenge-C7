@@ -20,8 +20,26 @@ const checkRole = (user) => {
 };
 
 const checkGameComplete = (room) => {
+  let result;
   if (room.choice1 && room.choice2) {
     if (room.choice1.length == MAX_GAME && room.choice2.length == MAX_GAME) {
+      for (i = 0; i < MAX_GAME; i++) {
+        if (
+          (room.choice1[i] === ROCK && room.choice2[i] === ROCK) ||
+          (room.choice1[i] === PAPER && room.choice2[i] === PAPER) ||
+          (room.choice1[i] === SCISSOR && room.choice2[i] === SCISSOR)
+        ) {
+          result = DRAW;
+        } else if (
+          (room.choice1[i] === ROCK && room.choice2[i] === SCISSOR) ||
+          (room.choice1[i] === PAPER && room.choice2[i] === ROCK) ||
+          (room.choice1[i] === SCISSOR && room.choice2[i] === PAPER)
+        ) {
+          result = WIN;
+        } else {
+          result = LOSE;
+        }
+      }
       return true;
     }
   }
@@ -34,7 +52,7 @@ const checkPlayerTurn = async (room, isFirstPlayer, isSecondPlayer) => {
   if (choice1 && choice2) {
     if (isFirstPlayer && choice1.length > choice2.length) {
       return false;
-    } else if (isSecondPlayer && choice2.length > choice1.length) {
+    } else if (isSecondPlayer && choice2.length >= choice1.length) {
       return false;
     }
   } else if (isFirstPlayer && choice1 && !choice2) {
@@ -45,31 +63,31 @@ const checkPlayerTurn = async (room, isFirstPlayer, isSecondPlayer) => {
   return true;
 };
 
-const checkGameResult = async (room) => {
-  const { choice1, choice2 } = room;
-  let scoreP1 = 0;
-  let scoreP2 = 0;
-  if (choice1 === choice2) {
-    return res.json("Result is ", DRAW);
-  } else if (
-    (choice1 == SCISSOR && choice2 == PAPER) ||
-    (choice1 == PAPER && choice2 == ROCK) ||
-    (choice1 == ROCK && choice2 == SCISSOR)
-  ) {
-    scoreP1 += 1;
-  } else if (
-    (choice2 == SCISSOR && choice1 == PAPER) ||
-    (choice2 == PAPER && choice1 == ROCK) ||
-    (choice2 == ROCK && choice1 == SCISSOR)
-  ) {
-    scoreP2 += 2;
-  }
-  if (scoreP1 > scoreP2) {
-    return res.json("Player 1 : ", WIN);
-  } else {
-    return res.json("Player 2 : ", WIN);
-  }
-};
+// const checkGameResult = async (room) => {
+//   const { choice1, choice2 } = room;
+//   let scoreP1 = 0;
+//   let scoreP2 = 0;
+//   if (choice1 === choice2) {
+//     return res.json("Result is ", DRAW);
+//   } else if (
+//     (choice1 == SCISSOR && choice2 == PAPER) ||
+//     (choice1 == PAPER && choice2 == ROCK) ||
+//     (choice1 == ROCK && choice2 == SCISSOR)
+//   ) {
+//     scoreP1 += 1;
+//   } else if (
+//     (choice2 == SCISSOR && choice1 == PAPER) ||
+//     (choice2 == PAPER && choice1 == ROCK) ||
+//     (choice2 == ROCK && choice1 == SCISSOR)
+//   ) {
+//     scoreP2 += 1;
+//   }
+//   if (scoreP1 > scoreP2) {
+//     return res.json("Player 1 : ", WIN);
+//   } else {
+//     return res.json("Player 2 : ", WIN);
+//   }
+// };
 
 const updatePlayer = async (room, userId) => {
   const { id: roomId } = room;
@@ -190,9 +208,10 @@ const game = async (req, res) => {
   }
 
   const isGameComplete = checkGameComplete(room);
+  //   const isCheckResult = await checkGameResult(room);
 
   if (isGameComplete) {
-    return res.json("Game is already complete");
+    return res.json(isGameComplete);
   }
 
   const {
@@ -240,7 +259,6 @@ const game = async (req, res) => {
   if (lastGame) {
     output = {
       roomId,
-      checkGameComplete,
       message: "Game Sudah Selesai",
     };
   }
