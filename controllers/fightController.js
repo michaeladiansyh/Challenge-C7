@@ -174,6 +174,10 @@ const saveChoice = async (room, choice, isFirstPlayer, isSecondPlayer) => {
   return { error: null };
 };
 
+const saveHistory = async (room) => {
+  const { id: roomId } = room;
+};
+
 const game = async (req, res) => {
   const { choice } = req.body;
 
@@ -211,7 +215,7 @@ const game = async (req, res) => {
   //   const isCheckResult = await checkGameResult(room);
 
   if (isGameComplete) {
-    return res.json(isGameComplete);
+    return res.json("Game is already complete! ");
   }
 
   const {
